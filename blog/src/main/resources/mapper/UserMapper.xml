@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.muyu.blog.mapper.UserMapper">
+
+    <insert id="register">
+        INSERT INTO user (user_name, email, password, admin)
+        VALUES (#{user.userName}, #{user.email}, #{user.password}, #{user.admin})
+    </insert>
+
+    <select id="getUserByUserName" resultType="com.muyu.blog.domain.User">
+        SELECT user_name,email,password,admin FROM user WHERE user_name = #{userName}
+    </select>
+
+    <!-- 根据用户名删除用户 -->
+    <delete id="deleteByUserName" parameterType="string">
+        DELETE FROM user WHERE user_name = #{userName}
+    </delete>
+
+    <!-- 修改用户密码 -->
+    <update id="updatePassword" parameterType="map">
+        UPDATE user SET password = #{newPassword}
+        WHERE user_name = #{userName}
+    </update>
+
+</mapper>
