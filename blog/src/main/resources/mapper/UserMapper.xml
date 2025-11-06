@@ -7,7 +7,7 @@
         VALUES (#{user.userName}, #{user.email}, #{user.password}, #{user.admin})
     </insert>
 
-    <select id="getUserByUserName" resultType="com.muyu.blog.domain.User">
+    <select id="getUserByUserName">
         SELECT user_name,email,password,admin FROM user WHERE user_name = #{userName}
     </select>
 

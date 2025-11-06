@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.muyu.blog.mapper.ArticleMapper">
+
+    <resultMap id="articleMap" type="com.muyu.blog.domain.Article">
+        <id column="id" property="id" />
+        <result column="title" property="title" />
+        <result column="summary" property="summary" />
+        <result column="cover" property="cover" />
+        <result column="content" property="content" />
+        <result column="author" property="author" />
+        <result column="status" property="status" />
+        <result column="category" property="category" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+    </resultMap>
+
+    <select id="getArticleList">
+        select id,title,content,author,status,category,create_time,update_time
+        from article limit #{begin},#{size}
+    </select>
+
+    <select id="getArticleCount" resultType="int">
+        select count(*) from article
+    </select>
+</mapper>
