@@ -2397,7 +2397,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // 按ESC键关闭弹窗
+    // 按ESC键关闭弹窗；阅读器内左右键翻页
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             if (loginModal.classList.contains('show')) {
@@ -2408,6 +2408,43 @@ document.addEventListener('DOMContentLoaded', function() {
                 closeModal(termsModal);
             } else if (bookReaderModal && bookReaderModal.classList.contains('show')) {
                 closeBookReaderModal();
+            }
+            return;
+        }
+        // 阅读器内左右键翻页（输入框/文本域内不响应，避免影响输入）
+        const active = document.activeElement;
+        const isInput = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA');
+        if (isInput || (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight')) return;
+
+        // 情况一：书架内嵌阅读器（书架页可见且已选书）
+        const bookshelfReaderActive = bookshelfSection && !bookshelfSection.classList.contains('hidden') && selectedBookId;
+        if (bookshelfReaderActive) {
+            e.preventDefault();
+            const userName = loginBtn.textContent || localStorage.getItem('rememberedUser') || '';
+            if (!userName || userName === '登陆') return;
+            const total = selectedBookTotalPages || 0;
+            const current = currentBookPageIndex || 1;
+            if (e.key === 'ArrowLeft') {
+                const target = Math.max(1, current - 1);
+                if (target !== current) loadWorkspaceReaderPage(userName, selectedBookId, target);
+            } else {
+                const target = total > 0 ? Math.min(total, current + 1) : current + 1;
+                if (target !== current) loadWorkspaceReaderPage(userName, selectedBookId, target);
+            }
+            return;
+        }
+
+        // 情况二：弹窗阅读器（bookReaderModal 打开且已有页码数据）
+        if (bookReaderModal && bookReaderModal.classList.contains('show') && currentBookPages && currentBookPages.length > 0) {
+            e.preventDefault();
+            const total = currentBookPages.length;
+            const idx = currentBookPageIndex || 0;
+            if (e.key === 'ArrowLeft') {
+                currentBookPageIndex = Math.max(0, idx - 1);
+                renderCurrentBookPage();
+            } else {
+                currentBookPageIndex = Math.min(total - 1, idx + 1);
+                renderCurrentBookPage();
             }
         }
     });
