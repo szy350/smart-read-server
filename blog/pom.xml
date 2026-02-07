@@ -29,6 +29,7 @@
     <properties>
         <java.version>17</java.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
+        <poi.version>5.3.0</poi.version>
     </properties>
     <dependencies>
         <dependency>
@@ -101,6 +102,30 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- PDF 处理：判断可编辑、拆分页 -->
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>2.0.30</version>
+        </dependency>
+
+        <!-- Word 处理：docx/doc 文本抽取 -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>${poi.version}</version>
+        </dependency>
+        <!-- doc（.doc，HWPF）位于 scratchpad 模块 -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-scratchpad</artifactId>
+            <version>${poi.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>com.google.genai</groupId>
+          <artifactId>google-genai</artifactId>
+          <version>1.0.0</version>
+        </dependency>
     </dependencies>
 
     <build>

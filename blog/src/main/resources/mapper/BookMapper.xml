@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.muyu.blog.mapper.BookMapper">
+
+    <resultMap id="bookMap" type="com.muyu.blog.domain.Book">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="user_name" property="userName"/>
+        <result column="file_name" property="fileName"/>
+        <result column="file_path" property="filePath"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.muyu.blog.domain.Book">
+        INSERT INTO book (user_id, user_name, file_name, file_path, status, create_time, update_time)
+        VALUES (#{userId}, #{userName}, #{fileName}, #{filePath}, #{status}, #{createTime}, #{updateTime})
+    </insert>
+
+    <insert id="insertBatch">
+        INSERT INTO book (user_id, user_name, file_name, file_path, status, create_time, update_time)
+        VALUES
+        <foreach collection="books" item="book" separator=",">
+            (#{book.userId}, #{book.userName}, #{book.fileName}, #{book.filePath}, #{book.status},
+            #{book.createTime}, #{book.updateTime})
+        </foreach>
+    </insert>
+
+    <select id="selectByUsernameAndFilename" resultMap="bookMap">
+        SELECT id, user_id, user_name, file_name, file_path, status, create_time, update_time
+        FROM book
+        WHERE user_name = #{userName} AND file_name = #{fileName}
+        ORDER BY update_time DESC
+    </select>
+
+    <select id="selectProcessingFileName" resultType="java.lang.String">
+        SELECT file_name FROM book
+        WHERE user_name = #{userName} AND status IN (0, 1)
+        LIMIT 1
+    </select>
+
+    <select id="selectProcessingFileNames" resultType="java.lang.String">
+        SELECT file_name
+        FROM book
+        WHERE user_name = #{userName} AND status IN (0, 1)
+        GROUP BY file_name
+        ORDER BY MAX(update_time) DESC
+    </select>
+
+    <select id="countByUserIdAndFileName" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM book
+        WHERE user_id = #{userId} AND file_name = #{fileName}
+    </select>
+
+    <select id="selectByStatus" resultMap="bookMap">
+        SELECT id, user_id, user_name, file_name, file_path, status, create_time, update_time
+        FROM book
+        WHERE status = #{status}
+        LIMIT 5
+    </select>
+
+    <select id="selectCompletedByUserName" resultMap="bookMap">
+        SELECT id, user_id, user_name, file_name, file_path, status, create_time, update_time
+        FROM book
+        WHERE user_name = #{userName} AND status = #{status}
+        ORDER BY update_time DESC
+    </select>
+
+    <select id="selectByIdAndUserName" resultMap="bookMap">
+        SELECT id, user_id, user_name, file_name, file_path, status, create_time, update_time
+        FROM book
+        WHERE id = #{id} AND user_name = #{userName}
+        LIMIT 1
+    </select>
+
+    <update id="updateStatus">
+        UPDATE book
+        SET status = #{status}, update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateStatusIfCurrent">
+        UPDATE book
+        SET status = #{toStatus}, update_time = NOW()
+        WHERE id = #{id} AND status = #{fromStatus}
+    </update>
+
+    <delete id="deleteByIdAndUserName">
+        DELETE FROM book
+        WHERE id = #{id}
+          AND user_name = #{userName}
+    </delete>
+
+</mapper>

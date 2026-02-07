@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.muyu.blog.mapper.UserHisActionMapper">
+
+    <select id="selectLatestByUserId" resultType="com.muyu.blog.domain.UserHisAction">
+        SELECT id,
+               user_id AS userId,
+               book_id AS bookId,
+               note_id AS noteId,
+               book_name AS bookName,
+               page_no AS pageNo,
+               context,
+               create_time AS createTime,
+               update_time AS updateTime
+        FROM user_his_action
+        WHERE user_id = #{userId}
+        ORDER BY id DESC
+        LIMIT 1
+    </select>
+
+    <insert id="insert" parameterType="com.muyu.blog.domain.UserHisAction" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user_his_action (user_id, book_id, note_id, book_name, page_no, context, create_time, update_time)
+        VALUES (#{userId}, #{bookId}, #{noteId}, #{bookName}, #{pageNo}, #{context}, NOW(), NOW())
+    </insert>
+
+    <update id="updateByUserId" parameterType="com.muyu.blog.domain.UserHisAction">
+        UPDATE user_his_action
+        SET book_id = #{bookId},
+            note_id = #{noteId},
+            book_name = #{bookName},
+            page_no = #{pageNo},
+            context = #{context},
+            update_time = NOW()
+        WHERE user_id = #{userId}
+    </update>
+
+</mapper>

@@ -16,7 +16,7 @@
     </resultMap>
 
     <select id="getArticleList">
-        select id,title,content,author,status,category,create_time,update_time
+        select id,title,summary,cover,content,author,status,category,create_time,update_time
         from article limit #{begin},#{size}
     </select>
 

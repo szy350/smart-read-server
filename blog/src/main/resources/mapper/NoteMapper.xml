@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.muyu.blog.mapper.NoteMapper">
+
+    <insert id="insert" parameterType="com.muyu.blog.domain.Note" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO note (user_id, book_id, content, summary, create_time, update_time)
+        VALUES (#{userId}, #{bookId}, #{content}, #{summary}, NOW(), NOW())
+    </insert>
+
+    <update id="updateContent">
+        UPDATE note
+        <set>
+            content = #{content},
+            <if test="summary != null">
+                summary = #{summary},
+            </if>
+            update_time = NOW()
+        </set>
+        WHERE id = #{id}
+          AND user_id = #{userId}
+          AND book_id = #{bookId}
+    </update>
+
+    <select id="selectTopByUserIdAndBookIdOrderByUpdateTimeDesc" resultType="com.muyu.blog.domain.Note">
+        SELECT id,
+               user_id AS userId,
+               book_id AS bookId,
+               content,
+               summary,
+               create_time AS createTime,
+               update_time AS updateTime
+        FROM note
+        WHERE user_id = #{userId}
+          AND book_id = #{bookId}
+        ORDER BY id ASC
+        LIMIT #{limit}
+    </select>
+
+    <select id="countByUserIdAndBookId" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM note
+        WHERE user_id = #{userId}
+          AND book_id = #{bookId}
+    </select>
+
+    <!-- MySQL: 通过子查询删除最早的一条（按 id 升序，id 最小即最早创建） -->
+    <delete id="deleteOldestOne">
+        DELETE FROM note
+        WHERE id IN (
+            SELECT id FROM (
+                SELECT id
+                FROM note
+                WHERE user_id = #{userId}
+                  AND book_id = #{bookId}
+                ORDER BY id ASC
+                LIMIT 1
+            ) t
+        )
+    </delete>
+
+    <select id="selectByIdAndUserIdAndBookId" resultType="com.muyu.blog.domain.Note">
+        SELECT id,
+               user_id AS userId,
+               book_id AS bookId,
+               content,
+               summary,
+               create_time AS createTime,
+               update_time AS updateTime
+        FROM note
+        WHERE id = #{id}
+          AND user_id = #{userId}
+          AND book_id = #{bookId}
+        LIMIT 1
+    </select>
+
+    <update id="updateSummary">
+        UPDATE note
+        SET summary = #{summary},
+            update_time = NOW()
+        WHERE id = #{id}
+          AND user_id = #{userId}
+          AND book_id = #{bookId}
+    </update>
+
+    <delete id="deleteByUserIdAndBookId">
+        DELETE FROM note
+        WHERE user_id = #{userId}
+          AND book_id = #{bookId}
+    </delete>
+
+</mapper>

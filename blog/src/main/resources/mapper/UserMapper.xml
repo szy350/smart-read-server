@@ -8,7 +8,7 @@
     </insert>
 
     <select id="getUserByUserName">
-        SELECT user_name,email,password,admin FROM user WHERE user_name = #{userName}
+        SELECT id,user_name as userName,email,password,admin FROM user WHERE user_name = #{userName}
     </select>
 
     <!-- 根据用户名删除用户 -->

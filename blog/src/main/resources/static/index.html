@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Muyu的博客</title>
+    <link rel="stylesheet" href="styles.css?v=1.5">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <h1>Muyu的博客</h1>
+            </div>
+            <nav class="nav">
+                <a href="#" class="nav-link active" id="homeTab">首页</a>
+                <a href="#" class="nav-link hidden" id="aiReadingTab">上传</a>
+                <a href="#" class="nav-link hidden" id="bookshelfTab">书架</a>
+            </nav>
+            <div class="header-right">
+                <button class="login-btn">登陆</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="article-section" id="articleSection">
+            <!-- Article List -->
+            <div class="article-list" id="articleList">
+                <!-- Loading indicator -->
+                <div class="loading-indicator" id="loadingIndicator">
+                    <div class="loading-spinner"></div>
+                    <p>加载中...</p>
+                </div>
+            </div>
+    
+            <!-- Pagination -->
+            <div class="pagination" id="paginationContainer">
+                <div class="page-numbers" id="pageNumbers"></div>
+            </div>
+        </div>
+
+        <div class="ai-reading-section hidden" id="aiReadingSection">
+            <div class="ai-reading-card">
+                <h2>AI阅读上传</h2>
+                <p class="ai-reading-description">上传文档，让AI帮助你快速阅读。</p>
+                <form class="ai-reading-form" id="aiReadingUploadForm">
+                    <label for="aiReadingFile" class="ai-reading-label">选择要上传的文件</label>
+                    <input type="file" id="aiReadingFile" class="ai-reading-input" accept=".txt,.doc,.docx,.pdf,.png,.jpg,.jpeg">
+                    <div class="ai-reading-hint">仅支持上传：txt / doc / docx / pdf / png / jpg</div>
+                    <button type="submit" class="ai-reading-upload-btn">上传</button>
+                </form>
+                <div class="upload-message hidden" id="aiUploadMessage"></div>
+                <div class="upload-progress-container hidden" id="uploadProgressContainer">
+                    <div class="upload-progress-header">
+                        <span class="upload-progress-title">上传进度</span>
+                        <span class="upload-progress-percentage" id="uploadProgressPercentage">0%</span>
+                    </div>
+                    <div class="upload-progress-bar">
+                        <div class="upload-progress-fill" id="uploadProgressFill"></div>
+                    </div>
+                    <div class="upload-progress-status" id="uploadProgressStatus">准备上传...</div>
+                </div>
+
+                <div class="upload-progress-container hidden" id="parsingProgressContainer">
+                    <div class="upload-progress-header">
+                        <span class="upload-progress-title">解析进度</span>
+                        <span class="upload-progress-percentage" id="parsingProgressSummary">0 个任务</span>
+                    </div>
+                    <div class="parsing-progress-list" id="parsingProgressList"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bookshelf page -->
+        <div class="bookshelf-section hidden" id="bookshelfSection">
+            <div class="bookshelf-page">
+                <div class="bookshelf-layout">
+                    <!-- 左：书籍列表 -->
+                    <aside class="bookshelf-col bookshelf-col-books">
+                        <div class="bookshelf-col-header">
+                            <div class="bookshelf-col-title">书籍</div>
+                            <div class="bookshelf-col-tools">
+                                <input type="text" id="bookshelfSearchInput" class="bookshelf-search" placeholder="搜索书名..." />
+                                <button type="button" class="bookshelf-refresh-btn" id="refreshBookshelfBtn" title="刷新">
+                                    <span class="refresh-icon" aria-hidden="true">↻</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bookshelf-list-wrap" id="bookshelfContainer">
+                            <div class="bookshelf-list" id="bookshelfList"></div>
+                            <div class="bookshelf-empty hidden" id="bookshelfEmpty">暂无已解析完成的书籍</div>
+                        </div>
+
+                        <div class="bookshelf-pagination hidden" id="bookshelfPagination">
+                            <button type="button" class="bookshelf-page-btn" id="bookshelfPrevBtn">上一页</button>
+                            <div class="bookshelf-page-numbers" id="bookshelfPageNumbers"></div>
+                            <button type="button" class="bookshelf-page-btn" id="bookshelfNextBtn">下一页</button>
+                        </div>
+                    </aside>
+
+                    <div class="col-resizer" data-resizer="books-notes" aria-hidden="true"></div>
+
+                    <!-- 中左：笔记 -->
+                    <section class="bookshelf-col bookshelf-col-notes">
+                        <div class="bookshelf-col-header">
+                            <div class="notes-header-left">
+                                <div class="bookshelf-col-title">笔记</div>
+                                <div class="bookshelf-col-subtitle" id="bookshelfNotesStatus">未选择书籍</div>
+                            </div>
+                            <div class="notes-header-right">
+                                <select id="notesSelect" class="notes-select" disabled>
+                                    <option value="">暂无笔记</option>
+                                </select>
+                                <button type="button" class="notes-new-btn" id="newNoteBtn" title="新增" aria-label="新增" disabled>
+                                    <svg class="notes-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                        <path d="M11 5a1 1 0 0 1 2 0v6h6a1 1 0 1 1 0 2h-6v6a1 1 0 1 1-2 0v-6H5a1 1 0 1 1 0-2h6V5z"></path>
+                                    </svg>
+                                </button>
+                                <button type="button" class="notes-stash-btn" id="stashNoteBtn" title="暂存" aria-label="暂存" disabled>
+                                    <svg class="notes-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                        <path d="M4 4a2 2 0 0 1 2-2h11.2a2 2 0 0 1 1.4.6l1.8 1.8a2 2 0 0 1 .6 1.4V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4zm2 0v16h12V7.8L16.2 6H6zm2 3h8a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1zm1 2v4h6V9H9z"></path>
+                                    </svg>
+                                </button>
+                                <button type="button" class="notes-export-btn" id="exportNoteBtn" title="导出笔记（txt）" disabled>⤓</button>
+                            </div>
+                        </div>
+                        <!-- 时间不放在顶部栏，改放到“下方编辑区”的右上角 -->
+                        <div class="notes-meta-row">
+                            <div class="notes-update-time" id="notesUpdateTime"></div>
+                        </div>
+                        <textarea id="bookshelfNotesInput" class="bookshelf-notes-textarea" placeholder="为当前书籍记录笔记（自动保存到云端）..." disabled></textarea>
+                    </section>
+
+                    <div class="col-resizer" data-resizer="notes-reader" aria-hidden="true"></div>
+
+                    <!-- 中右：正文 -->
+                    <section class="bookshelf-col bookshelf-col-reader">
+                        <div class="bookshelf-col-header">
+                            <div class="bookshelf-col-title" id="bookshelfReaderTitle">正文</div>
+                            <div class="reader-nav">
+                                <button type="button" class="page-btn icon-btn" id="readerPrevPageBtn" aria-label="上一页" disabled>←</button>
+                                <span class="reader-page-info" id="readerPageInfo">第 0/0 页</span>
+                                <button type="button" class="page-btn icon-btn" id="readerNextPageBtn" aria-label="下一页" disabled>→</button>
+                                <div class="reader-jump-group">
+                                    <input type="number" min="1" class="reader-jump-input" id="readerJumpInput" placeholder="页码" disabled />
+                                    <button type="button" class="page-btn" id="readerJumpBtn" disabled>跳转</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bookshelf-reader-content" id="readerContent">
+                            <div class="bookshelf-placeholder">请选择左侧一本书开始阅读</div>
+                        </div>
+                    </section>
+
+                    <div class="col-resizer" data-resizer="reader-ai" aria-hidden="true"></div>
+
+                    <!-- 右：AI提问 -->
+                    <section class="bookshelf-col bookshelf-col-ai">
+                        <div class="bookshelf-col-header">
+                            <div class="bookshelf-col-title">AI提问</div>
+                        </div>
+                        <div class="ai-qa">
+                            <div class="ai-qa-list" id="aiQaList"></div>
+                            <!-- 已添加上下文：固定在输入区上方，不占输入区空间 -->
+                            <div class="ai-context-bar hidden" id="aiContextBar">
+                                <div class="ai-context-title">已添加上下文</div>
+                                <div class="ai-context-preview" id="aiContextPreview"></div>
+                                <button type="button" class="ai-context-clear" id="aiContextClearBtn" title="清除上下文">清除</button>
+                            </div>
+                            <div class="ai-qa-input">
+                                <!-- 选中 AI 回答内容后：提示是否添加到左侧笔记（非弹窗） -->
+                                <div class="ai-selection-bar hidden" id="aiSelectionBar" aria-live="polite">
+                                    <div class="ai-selection-preview" id="aiSelectionPreview"></div>
+                                    <div class="ai-selection-buttons">
+                                        <button type="button" class="ai-selection-btn primary" id="addAiSelectionToNotesBtn">添加到笔记</button>
+                                        <button type="button" class="ai-selection-btn" id="dismissAiSelectionBarBtn">忽略</button>
+                                    </div>
+                                </div>
+                                <div class="ai-question-wrap">
+                                    <textarea id="aiQuestionInput" class="ai-question-textarea" placeholder="输入你的问题...（Enter 发送，Shift+Enter 换行）" disabled></textarea>
+                                    <button type="button" class="ai-ask-btn" id="aiAskBtn" aria-label="提问" title="提问（Enter）" disabled>⏎</button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Login Modal -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>用户登录</h2>
+                <button class="close-btn" id="closeLoginModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form class="login-form">
+                    <div class="form-group">
+                        <label for="loginUsername">用户名</label>
+                        <input type="text" id="loginUsername" name="username" placeholder="请输入用户名" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">密码</label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="loginPassword" name="password" placeholder="请输入密码" required>
+                            <span class="password-toggle" id="loginPasswordToggle"></span>
+                        </div>
+                    </div>
+                    <div class="form-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="remember">
+                            <span>记住我</span>
+                        </label>
+                        <a href="#" class="forgot-password">忘记密码？</a>
+                    </div>
+                    <button type="submit" class="login-submit-btn">登录</button>
+                </form>
+                <div class="login-footer">
+                    <p>还没有账号？<a href="#" class="register-link">立即注册</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div class="modal-overlay" id="registerModal">
+        <div class="modal-content register-modal-content">
+            <div class="modal-header">
+                <h2>用户注册</h2>
+                <button class="close-btn" id="closeRegisterModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form class="register-form">
+                    <div class="form-group">
+                        <label for="registerUsername">用户名</label>
+                        <input type="text" id="registerUsername" name="username" placeholder="请输入用户名" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerEmail">邮箱</label>
+                        <input type="email" id="registerEmail" name="email" placeholder="请输入邮箱" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerPassword">密码</label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="registerPassword" name="password" placeholder="请输入密码" required>
+                            <span class="password-toggle" id="registerPasswordToggle"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">确认密码</label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="confirmPassword" name="confirmPassword" placeholder="请再次输入密码" required>
+                            <span class="password-toggle" id="confirmPasswordToggle"></span>
+                        </div>
+                    </div>
+                    <div class="form-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="agreeTerms" required>
+                            <span>我已阅读并同意<a href="#" class="terms-link" id="showTerms">用户协议</a></span>
+                        </label>
+                    </div>
+                    <button type="submit" class="register-submit-btn">注册</button>
+                </form>
+                <div class="register-footer">
+                    <p>已有账号？<a href="#" class="login-link">立即登录</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terms Modal -->
+    <div class="modal-overlay" id="termsModal">
+        <div class="modal-content terms-modal-content">
+            <div class="modal-header">
+                <h2>用户协议</h2>
+                <button class="close-btn" id="closeTermsModal">&times;</button>
+            </div>
+            <div class="modal-body terms-body">
+                <div class="terms-content">
+                    <p class="terms-intro">欢迎使用。本协议是您与我方之间就使用博客服务及评论功能所订立的约定。请您在使用前仔细阅读，一旦您发表评论或使用本博客服务，即视为您已接受本协议全部内容。</p>
+                    
+                    <h3>一、服务范围</h3>
+                    <ul>
+                        <li>本博客主要提供个人原创内容展示服务，同时开放用户评论功能，允许用户在文章下方发表合法、合规的评论。</li>
+                        <li>您使用本博客服务时，应遵守国家法律法规及本协议约定，不得利用评论功能从事违法违规活动。</li>
+                    </ul>
+                    
+                    <h3>二、用户评论规则</h3>
+                    <p>您保证发表的评论内容为本人真实意思表示，且不包含以下信息：</p>
+                    <ul>
+                        <li>违反国家法律法规、损害国家利益、破坏民族团结的内容；</li>
+                        <li>涉及色情、暴力、恐怖、赌博、迷信等违背公序良俗的内容；</li>
+                        <li>侮辱、诽谤、恐吓他人，侵犯他人姓名权、肖像权、名誉权、隐私权等合法权益的内容；</li>
+                        <li>含有病毒链接、恶意广告、垃圾信息等干扰博客正常运营的内容；</li>
+                        <li>其他我方认为不适宜发布的内容。</li>
+                    </ul>
+                    <p>您对自己发表的评论内容承担全部法律责任。若因您的评论侵犯第三方合法权益或违反法律法规，您应自行承担相应责任，若因此导致我方被追责，您需赔偿我方全部损失（包括但不限于罚款、律师费、诉讼费等）。</p>
+                    <p>我方有权对评论内容进行审核，对违反本协议或相关规定的评论，有权采取删除、屏蔽等措施，且无需提前通知您。</p>
+                    
+                    <h3>三、知识产权</h3>
+                    <ul>
+                        <li>本博客内的原创文章、图片、视频等内容（除用户评论外），知识产权归我方所有。未经我方书面许可，任何人不得擅自复制、转载、传播、改编或用于商业用途。</li>
+                        <li>您发表的评论内容，知识产权归您所有，但您授予我方一项免费、非独占的使用权，允许我方在本博客范围内展示、存储该评论，无需另行支付费用。</li>
+                    </ul>
+                    
+                    <h3>四、免责声明</h3>
+                    <ul>
+                        <li>本博客内容仅为个人观点分享，不构成任何专业建议（如法律、医疗、投资等），您据此作出的决策，我方不承担责任。</li>
+                        <li>我方对用户评论的真实性、准确性不承担保证责任，评论内容仅代表用户个人观点，与我方立场无关。</li>
+                        <li>因不可抗力（如网络故障、系统维护、政策调整等）导致博客服务暂时中断或评论数据丢失，我方已尽合理努力避免的，不承担赔偿责任。</li>
+                    </ul>
+                    
+                    <h3>五、协议变更与终止</h3>
+                    <ul>
+                        <li>我方有权根据实际情况修订本协议，修订后将在博客首页公告，公告发布后您继续使用服务即视为接受修订内容。</li>
+                        <li>若您违反本协议，我方有权限制您的评论功能或禁止您使用本博客服务，且无需承担责任。</li>
+                        <li>本协议自您首次使用本博客服务之日起生效，终止使用服务后，本协议中关于知识产权、免责声明的条款仍继续有效。</li>
+                    </ul>
+                    
+                    <p class="terms-contact">如有疑问，可通过【联系邮箱：1434130044@qq.com】与我方沟通。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Article Detail Modal -->
+    <div class="modal-overlay" id="articleDetailModal">
+        <div class="modal-content article-detail-modal-content">
+            <div class="modal-header">
+                <h2 id="articleDetailTitle">文章详情</h2>
+                <button class="close-btn" id="closeArticleDetailModal">&times;</button>
+            </div>
+            <div class="modal-body article-detail-body">
+                <div class="article-detail-content" id="articleDetailContent">
+                    <div class="article-detail-loading">
+                        <div class="loading-spinner"></div>
+                        <p>加载中...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Book Reader Modal -->
+    <div class="modal-overlay" id="bookReaderModal">
+        <div class="modal-content article-detail-modal-content">
+            <div class="modal-header">
+                <h2 id="bookReaderTitle">阅读</h2>
+                <button class="close-btn" id="closeBookReaderModal">&times;</button>
+            </div>
+            <div class="modal-body article-detail-body">
+                <div class="upload-progress-header" style="margin-bottom: 10px;">
+                    <button type="button" class="page-btn icon-btn" id="bookPrevPageBtn" aria-label="上一页">←</button>
+                    <span class="upload-progress-percentage" id="bookReaderPageInfo">第 0/0 页</span>
+                    <button type="button" class="page-btn icon-btn" id="bookNextPageBtn" aria-label="下一页">→</button>
+                </div>
+                <div class="article-detail-content" id="bookReaderContent">
+                    <div class="article-detail-loading">
+                        <div class="loading-spinner"></div>
+                        <p>加载中...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast 提示容器 -->
+    <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+    <script src="script.js?v=1.9"></script>
+</body>
+</html>
